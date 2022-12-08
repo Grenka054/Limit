@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-from math import factorial, exp, sqrt, pi
+from math import sqrt
 import scipy. stats as stats
-from numpy import random
 
 
 class ValueError(Exception):
@@ -26,10 +24,33 @@ def LoLN(distrib):
     ex = distrib.ex
     _, ax = plt.subplots(1, 1)
     exs = []
+    sum = 0
     for i in range(1, len(r)):
-        exs.append(sum(r[:i]) / i)
+        sum += r[i]
+        exs.append(sum / i)
     ax.plot(range(1, len(r)), exs, 'g-', lw=2, label=distrib.name+' E(X)')
     plt.scatter([len(r) + 1], ex, c='red', marker='*', label='expect', s=40)
+    ax.legend(loc='best', frameon=False)
+    plt.show()
+
+
+def CLT(distrib):
+    r = distrib.rv.rvs(2000000)
+    ex = distrib.ex
+    dx = distrib.dx
+    _, ax = plt.subplots(1, 1)
+    dxs = []
+    sum = 0
+    for i in range(1, len(r)):
+        sum += r[i]
+        dxs.append((sum - i * ex) / sqrt(i * dx))
+        # dxs.append(sum/i)
+    i = 10
+    while i <= 1000000:
+        print(distrib.name, i, dxs[i])
+        i *= 10
+    ax.plot(range(1, len(r)), dxs, 'g-', lw=2, label=distrib.name+' CLT')
+    # plt.scatter([len(r) + 1], ex, c='red', marker='*', label='expect', s=40)
     ax.legend(loc='best', frameon=False)
     plt.show()
 
@@ -42,8 +63,9 @@ class Gamma:
         self.scale = scale
         self.rv = stats.gamma(k, loc=loc, scale=scale)
         self.ex = stats.gamma.expect(lambda x: x, (k,), loc=loc, scale=scale)
+        self.dx = stats.gamma.var(k, loc=loc, scale=scale)
         self.name = 'gamma'
-        self.limit_val = 4000
+        self.limit_val = 2000000
 
     def get_density_plot(self, x):
         return self.rv.pdf(x)
@@ -65,8 +87,9 @@ class Norm:
         self.scale = scale
         self.rv = stats.norm(loc, scale)
         self.ex = stats.norm.expect(lambda x: x, loc=loc, scale=scale)
+        self.dx = stats.norm.var(loc=loc, scale=scale)
         self.name = 'norm'
-        self.limit_val = 6000
+        self.limit_val = 4000
 
     def get_density_plot(self, x):
         return self.rv.pdf(x)
@@ -88,6 +111,7 @@ class Binom:
         self.scale = scale
         self.rv = stats.binom(n, p)
         self.ex = stats.binom.expect(lambda x: x, (n, p,), loc, scale)
+        self.dx = stats.binom.var(n, p, loc=loc)
         self.name = 'binomial'
         self.limit_val = 6000
 
@@ -113,6 +137,7 @@ class Uniform:
         self.scale = b - a
         self.rv = stats.uniform(loc=self.loc, scale=self.scale)
         self.ex = stats.uniform.expect(lambda x: x, loc=self.loc, scale=self.scale)
+        self.dx = stats.uniform.var(self.loc, self.scale)
         self.name = 'uniform'
         self.limit_val = 1000
 
@@ -135,6 +160,7 @@ class Poisson:
         self.scale = scale
         self.rv = stats.poisson(mu)
         self.ex = stats.poisson.expect(lambda x: x, (mu,), loc, scale)
+        self.dx = stats.poisson.var(mu, loc=loc)
         self.name = 'poisson'
         self.limit_val = 6000
         self.r = [0]
@@ -160,6 +186,7 @@ class Geom:
         self.scale = scale
         self.rv = stats.geom(p)
         self.ex = stats.geom.expect(lambda x: x, (p,), loc, scale)
+        self.dx = stats.geom.var(p, loc=loc)
         self.name = 'geometric'
         self.limit_val = 6000
         self.r = []
@@ -187,6 +214,7 @@ class Hypergeom:
         self.scale = scale
         self.rv = stats.hypergeom(M, n, N)
         self.ex = stats.hypergeom.expect(lambda x: x, (M, n, N,), loc, scale)
+        self.dx = stats.hypergeom.var(M, n, N, loc=loc)
         self.name = 'hgypergeometric'
         self.limit_val = 6000
         self.r = []
@@ -214,6 +242,7 @@ class Cauchy:
         self.scale = scale
         self.rv = stats.cauchy(loc=loc, scale=scale)
         self.ex = stats.cauchy.expect(lambda x: x, loc=loc, scale=scale)
+        self.dx = stats.cauchy.var(loc=loc, scale=scale)
         self.name = 'cauchy'
         self.limit_val = 6000
 
@@ -226,7 +255,7 @@ class Cauchy:
 
 if __name__ == '__main__':
     # 1
-    gamma = Gamma(1.99, 5)
+    gamma = Gamma(1.99, 0)
     norm = Norm(1000, 10)
     binom = Binom(40, 0.2)
     uniform = Uniform(6, 11)
@@ -254,3 +283,10 @@ if __name__ == '__main__':
     # LoLN(cauchy)  # мат ожидания не существует
 
     # 3
+    CLT(gamma)
+    CLT(norm)
+    CLT(binom)
+    CLT(uniform)
+    CLT(poisson)
+    CLT(geom)
+    CLT(hypergeom)
