@@ -35,7 +35,8 @@ def LoLN(distrib):
 
 
 def CLT(distrib):
-    r = distrib.rv.rvs(2000000)
+    limit = 2000000
+    r = distrib.rv.rvs(limit)
     ex = distrib.ex
     dx = distrib.dx
     _, ax = plt.subplots(1, 1)
@@ -46,7 +47,7 @@ def CLT(distrib):
         dxs.append((sum - i * ex) / sqrt(i * dx))
         # dxs.append(sum/i)
     i = 10
-    while i <= 1000000:
+    while i <= limit:
         print(distrib.name, i, dxs[i])
         i *= 10
     ax.plot(range(1, len(r)), dxs, 'g-', lw=2, label=distrib.name+' CLT')
